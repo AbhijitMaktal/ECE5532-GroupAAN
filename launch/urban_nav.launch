@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+
+<launch>
+  <!-- Leave this here -->
+  <include file="$(find ugv_course_launch)/launch/audibot_sim_project.launch" />
+  <node pkg="gps_sim_project" type="test_gps_sim_project" name="test" output="screen" />
+  <node pkg="rviz" type="rviz" name="sim_project_rviz" respawn="true" args="-d $(find gps_sim_project)/rviz/sim_project.rviz" />
+
+  <!-- Launch your part of the system here! -->
+  <node ns="audibot" pkg="audibot_twist_controller" type="audibot_twist_node" name="audibot_twist_node" />
+  <node pkg="gps_sim_project" type="gps_sim" name="gps_sim" />
+</launch>
