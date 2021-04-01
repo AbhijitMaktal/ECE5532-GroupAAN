@@ -10,7 +10,6 @@
 #include <tf/tf.h>
 #include <tf/transform_broadcaster.h>
 
-
 UTMCoords ref_coords;
 tf::Vector3 relative_position;
 nav_msgs::Path gps_path;
