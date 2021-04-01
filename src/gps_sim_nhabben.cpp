@@ -128,10 +128,12 @@ void timerCallback(const ros::TimerEvent& event){
   cmd_vehicle.data = veh_angle;
   pub_angles.publish(cmd_vehicle);
 
+/*
   if (dist<0.99){ //Set threshold below 1 
     current_waypoint++; //Is this correct???
   }
-
+*/
+/*
   ROS_INFO("Relative Position: (%f, %f)", relative_position.x(), relative_position.y());
   //ROS_INFO("Waypoint UTM: (%f, %f)", waypoint_coords.getX(), waypoint_coords.getY());
   ROS_INFO("Waypoint Relative Position: (%f, %f)", relative_position_waypoint[i].x(), relative_position_waypoint[i].y());
@@ -149,7 +151,7 @@ void timerCallback(const ros::TimerEvent& event){
   ROS_INFO("convergence_angle : (%f)", convergence_angle);
   ROS_INFO("Current waypoint: (%d)",current_waypoint);
   //ROS_INFO("Current waypoint: (%d)",current_waypoint);
-
+*/
 }
 
 void recvFix(const sensor_msgs::NavSatFixConstPtr& msg){
@@ -157,48 +159,8 @@ void recvFix(const sensor_msgs::NavSatFixConstPtr& msg){
   veh_lat = msg->latitude;
   veh_lon = msg->longitude;
   relative_position = current_coords - ref_coords;
-
-  //Markers setup
-  marker_array_msg.markers.resize(8); //Change to the size of the markers
-  marker.header.frame_id = "world"; //audibot/base_footprint
-  marker.type = visualization_msgs::Marker::CYLINDER; 
-  marker.action = visualization_msgs::Marker::ADD;
-//check sizeeeeeeeee///////// Config all maerkser to be the same
-  marker.scale.x = 2;
-  marker.scale.y = 2;
-  marker.scale.z = 10;
-
-  marker.color.r = 1.0;
-  marker.color.g = 1.0;
-  marker.color.b = 0.0;
-  marker.color.a = 1.0;
-
-  marker.pose.position.x = 0;
-  marker.pose.position.y = 0;
-  marker.pose.position.z = 0.0;
-  marker.pose.orientation.x = 0.0;
-  marker.pose.orientation.y = 0.0;
-  marker.pose.orientation.z = 0.0;
-  marker.pose.orientation.w = 0.0;
-
- for (int j = 0; j < 8; j++) {
-  marker.pose.position.x = relative_position_waypoint[j].x();
-  marker.pose.position.y = relative_position_waypoint[j].y();
-  marker.id = j;
-
-  marker_array_msg.markers[j] = marker; 
- }
- 
-  pub_markers.publish(marker_array_msg);
+//Removed Marker Array
   
-/*
-  if(marker_array_msg.markers.size() != 0){
-    pub_markers.publish(marker_array_msg);
-    ROS_INFO("Marker array is being published");
-  } else{
-    ROS_WARN("Marker array is empty");
-  }
-  */
 }
 
 void recvFix2(const std_msgs::Float64ConstPtr& msg){
@@ -207,7 +169,7 @@ void recvFix2(const std_msgs::Float64ConstPtr& msg){
 
 
 int main(int argc, char** argv){
-  ros::init(argc,argv,"gps_example");
+  ros::init(argc,argv,"gps_sim_nhabben");
   ros::NodeHandle nh;
   ros::Subscriber gps_heading = nh.subscribe("/audibot/gps/fix",1,recvFix);
   ros::Subscriber gps_sub = nh.subscribe("/audibot/gps/heading",1,recvFix2);
@@ -231,11 +193,6 @@ int main(int argc, char** argv){
 
   pub_vel = nh.advertise<geometry_msgs::Twist>("/audibot/cmd_vel", 1);
   pub_steering = nh.advertise<std_msgs::Float64>("/audibot/steering_cmd", 1);
-
-  pub_markers = nh.advertise<visualization_msgs::MarkerArray>("marker_array",1);
-  pub_angles = nh.advertise<std_msgs::Float64>("angles_theta",1);
-  pub_angles2 = nh.advertise<std_msgs::Float64>("angles_error",1);
-  pub_angles3 = nh.advertise<std_msgs::Float64>("veh_angle",1);
 
   ros::spin();
 }
