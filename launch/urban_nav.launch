@@ -6,5 +6,5 @@
 
   <!-- Launch your part of the system here! -->
   <node ns="audibot" pkg="audibot_twist_controller" type="audibot_twist_node" name="audibot_twist_node" />
-  <node pkg="urban_nav" type="gps_sim_nhabben" name="gps_sim_nhabben" />
+  <!-- <node pkg="urban_nav" type="gps_sim_nhabben" name="gps_sim_nhabben" /> -->
 </launch>
