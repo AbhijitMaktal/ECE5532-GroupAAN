@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+
+<launch>
+  <!-- Leave this here -->
+  <include file="$(find ugv_course_launch)/launch/audibot_road_world.launch" />
+
+  <!-- Launch your part of the system here! -->
+  <node ns="audibot" pkg="audibot_twist_controller" type="audibot_twist_node" name="audibot_twist_node" />
+  <node pkg="urban_nav" type="gps_sim_nhabben" name="gps_sim_nhabben" />
+</launch>
