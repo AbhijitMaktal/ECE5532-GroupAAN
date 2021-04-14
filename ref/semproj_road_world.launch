@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+  <include file="$(find ugv_course_launch)/launch/audibot_road_world.launch"
+/>
+  <include file="$(find audibot_lane_detection)/launch/lane_detection.launch"
+>
+    <arg name="nodelet" value="true" />
+  </include>
+<node ns="audibot" pkg="audibot_path_following"
+type="audibot_path_following" name="path_following" output="screen" />
+
+<node pkg="semproj_road_world" type="semproj_road_world"
+name="semproj_road_world" output="screen" >
+
+<remap from="/roadsteer_cmd" to="/audibot/cmd_vel" />
+
+</node>
+
+</launch>

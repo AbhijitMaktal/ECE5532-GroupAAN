@@ -5,6 +5,24 @@
   <include file="$(find ugv_course_launch)/launch/audibot_road_world.launch" />
 
   <!-- Launch your part of the system here! -->
-  <node ns="audibot" pkg="audibot_twist_controller" type="audibot_twist_node" name="audibot_twist_node" />
+  <!-- <node ns="audibot" pkg="audibot_twist_controller" type="audibot_twist_node" name="audibot_twist_node" /> -->
   <!-- <node pkg="urban_nav" type="gps_sim_nhabben" name="gps_sim_nhabben" /> -->
+
+  <include file="$(find audibot_lane_detection)/launch/lane_detection.launch" >
+     <arg name="nodelet" value="true" />
+    <!-- <arg name="robot_name" value="audibot" /> --> 
+    <!-- Usure if this line is needed -->
+  </include>
+
+   <group ns="audibot" >
+    <node pkg="audibot_path_following" type="audibot_path_following" name="path_following" output="screen" >
+      <!-- <param name="speed" value="10" /> -->
+    </node>
+    <!-- <node pkg="audibot_twist_controller" type="audibot_twist_node" name="twist_control" output="screen" /> -->
+  </group>
+    
+  <!-- <node pkg="urban_nav" type="gps_sim_nhabben" name="gps_sim_nhabben" output="screen" /> -->
+  <node pkg="urban_nav" type="gps_sim_nhabben" name="gps_sim_nhabben" output="screen"/>
+  <!-- <node pkg="urban_nav" type="topic" name="topic" /> -->
+  
 </launch>

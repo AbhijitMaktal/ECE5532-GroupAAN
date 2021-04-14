@@ -20,3 +20,6 @@ include_directories(
 
 add_executable(gps_sim_nhabben src/gps_sim_nhabben.cpp)
 target_link_libraries(gps_sim_nhabben ${catkin_LIBRARIES})
+
+add_executable(topic src/topic.cpp)
+target_link_libraries(topic ${catkin_LIBRARIES})
