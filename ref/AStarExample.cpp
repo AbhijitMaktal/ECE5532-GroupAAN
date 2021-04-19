@@ -5,6 +5,51 @@ using namespace std;
 #define ROW 24
 #define COL 15
 
+vector<int> waypointPath;
+int lastInterRow; int lastInterCol; int lastInter;
+
+//A function to test if a given row, col exist as an intersection
+void OnPathTest(int row,int col){
+	
+	int locationArray[17][2]={
+	{21,6}, //A
+	{6,14}, //B
+	{6,12}, //C
+	{10,12},//D
+	{13,12},//E
+	{13,8}, //F
+	{16,6}, //G
+	{8,8},  //H
+	{6,8},  //I
+	{12,4}, //J
+	{10,6}, //K
+	{12,6}, //L
+	{10,10},//M
+	{2,6},  //N
+	{0,8},  //O
+	{4,10}, //P
+	{23,6}, //Q
+	};
+
+	//printf("inside OnPathTest");
+	
+	//if (!lastInter)
+
+
+
+	// for(int z = 0; z = sizeof(locationArray); z++){
+	for(int z = 0; z < 17; z++){
+		if (row == locationArray[z][0] && col == locationArray[z][1]){
+			waypointPath.push_back (z);
+			//printf("%d added \n",z);
+		}
+	}
+	
+
+
+	return;
+}
+
 // Creating a shortcut for int, int pair type
 typedef pair<int, int> Pair;
 
@@ -84,16 +129,17 @@ void tracePath(cell cellDetails[][COL], Pair dest)
 		pair<int, int> p = Path.top();
 		Path.pop();
 		printf("-> (%d,%d) ", p.first, p.second);
+		//printf("Before OnPathTest");
+		//Added to check if row, col are a intersection, add to global list
+		OnPathTest(p.first,p.second);
 	}
 
-
+	//printf("\n %d \n",Path.top());
 
 	return;
 }
 
-void GPSpointTest(){
-	
-}
+
 
 // A Function to find the shortest path between
 // a given source cell to a destination cell according
@@ -146,6 +192,7 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 			cellDetails[i][j].h = FLT_MAX;
 			cellDetails[i][j].parent_i = -1;
 			cellDetails[i][j].parent_j = -1;
+			//cellDetails[i][j].direction = 0; //Probably delete
 		}
 	}
 
@@ -156,7 +203,7 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 	cellDetails[i][j].h = 0.0;
 	cellDetails[i][j].parent_i = i;
 	cellDetails[i][j].parent_j = j;
-
+	//cellDetails[i][j].direction = 0;
 	/*
 	Create an open list having information as-
 	<f, <i, j>>
@@ -186,7 +233,7 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 		j = p.second.second;
 		closedList[i][j] = true;
 
-		printf("-> p (%d,%d) F (%f)  \n", p.second.first, p.second.second, p.first);
+		// printf("-> p (%d,%d) F (%f)  \n", p.second.first, p.second.second, p.first); //Used for troublehshooting
 		// printf("",)
 		/*
 		Generating all the 8 successor of this cell
@@ -653,10 +700,10 @@ int main()
 };
 
 	// Source is the left-most bottom-most corner
-	Pair src = make_pair(6, 8);
+	Pair src = make_pair(20, 6);
 
 	// Destination is the left-most top-most corner
-	Pair dest = make_pair(16, 6);
+	Pair dest = make_pair(10, 10);
 
 	aStarSearch(grid, src, dest);
 
