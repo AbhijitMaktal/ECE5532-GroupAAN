@@ -5,14 +5,14 @@ using namespace std;
 #define ROW 24
 #define COL 15
 
-vector<int> waypointPath;
-int lastInterRow; int lastInterCol; int lastInter;
+vector<int> waypointPath; vector<int> waypointTurn;
+int lastcellRow1; int lastcellCol1; int lastcellRow2; int lastcellCol2; int lastInter = 0;
 
 //A function to test if a given row, col exist as an intersection
 void OnPathTest(int row,int col){
 	
 	int locationArray[17][2]={
-	{21,6}, //A
+	{20,7}, //A
 	{6,14}, //B
 	{6,12}, //C
 	{10,12},//D
@@ -25,27 +25,79 @@ void OnPathTest(int row,int col){
 	{10,6}, //K
 	{12,6}, //L
 	{10,10},//M
-	{2,6},  //N
+	{2,7},  //N
 	{0,8},  //O
 	{4,10}, //P
-	{23,6}, //Q
+	{23,7}, //Q
 	};
 
 	//printf("inside OnPathTest");
 	
 	//if (!lastInter)
 
+	//Check for turn before deciding if the current point is an intersection
+	if (lastInter){
+		//Calculate Angle of Travel
+		int delrow; int delcol;
+		delrow = row-lastcellRow2;
+		delcol = col-lastcellCol2;
+		double angleInter = atan(delrow/delcol);
+
+		int turnDir;
+		//Last point was an intersection, check for turn
+		if(row == lastcellRow2 || col == lastcellCol2){
+			//Straight
+			turnDir = 0;
+		}
+		else if(lastcellRow1 == lastcellRow2) // East/West
+		{
+			if(angleInter<0){
+				//Left Turn}
+				turnDir = -1;
+			}
+			else{
+				//Right Turn
+				turnDir = 1;
+			}
+		}
+		else if(lastcellCol1 == lastcellCol2) // North/South
+		{
+			if(angleInter>0){ //Positive is a Left Turn
+				//Left Turn}
+				turnDir = -1;
+			}
+			else{
+				//Right Turn
+				turnDir = 1;
+			}
+		}
+		printf("\nTurn %d added \n",turnDir);
+		waypointTurn.push_back(turnDir);
+		//Reset Trigger
+		lastInter = 0;
+	}
 
 
 	// for(int z = 0; z = sizeof(locationArray); z++){
 	for(int z = 0; z < 17; z++){
 		if (row == locationArray[z][0] && col == locationArray[z][1]){
 			waypointPath.push_back (z);
-			//printf("%d added \n",z);
+			printf("\nIntersection %d added \n",z);
+			lastInter = 1; //sets to true
 		}
 	}
 	
-
+	if (!lastcellRow2)
+	{
+		lastcellRow2 = row;
+		lastcellCol2 = col;
+	}
+	else{
+	lastcellRow2 = lastcellRow1; 
+	lastcellCol2 = lastcellCol1;
+	}
+	lastcellRow1 = row;
+	lastcellCol1 = col;
 
 	return;
 }
@@ -673,11 +725,11 @@ int main()
 	0--> The cell is blocked */
   int grid[ROW][COL]
       = {
-{0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0},
-{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0}, 
+{0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0}, 
 {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, 
-{1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1}, 
-{1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1}, 
+{1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1}, 
+{1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1}, 
 {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}, 
 {1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1}, 
 {1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1}, 
@@ -694,16 +746,16 @@ int main()
 {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}, 
 {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}, 
 {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}, 
-{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0}, 
-{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0}, 
-{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0}, 
+{0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0}, 
+{0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0},
 };
 
 	// Source is the left-most bottom-most corner
-	Pair src = make_pair(20, 6);
+	Pair src = make_pair(20, 7);
 
 	// Destination is the left-most top-most corner
-	Pair dest = make_pair(10, 10);
+	Pair dest = make_pair(4, 10);
 
 	aStarSearch(grid, src, dest);
 
