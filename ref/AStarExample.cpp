@@ -6,11 +6,13 @@ using namespace std;
 #define COL 15
 
 vector<int> waypointPath; vector<int> waypointTurn;
-int lastcellRow1; int lastcellCol1; int lastcellRow2; int lastcellCol2; int lastInter = 0;
+int lastcellRow1; int lastcellCol1; int lastcellRow2; int lastcellCol2; int lastInter = 0; int PathTestCnt = -1;
 
 //A function to test if a given row, col exist as an intersection
 void OnPathTest(int row,int col){
 	
+	PathTestCnt++;
+
 	int locationArray[17][2]={
 	{20,7}, //A
 	{6,14}, //B
@@ -41,7 +43,7 @@ void OnPathTest(int row,int col){
 		int delrow; int delcol;
 		delrow = row-lastcellRow2;
 		delcol = col-lastcellCol2;
-		double angleInter = atan(delrow/delcol);
+
 
 		int turnDir;
 		//Last point was an intersection, check for turn
@@ -51,6 +53,7 @@ void OnPathTest(int row,int col){
 		}
 		else if(lastcellRow1 == lastcellRow2) // East/West
 		{
+			double angleInter = atan(delrow/delcol);
 			if(angleInter<0){
 				//Left Turn}
 				turnDir = -1;
@@ -62,6 +65,7 @@ void OnPathTest(int row,int col){
 		}
 		else if(lastcellCol1 == lastcellCol2) // North/South
 		{
+			double angleInter = atan(delrow/delcol);
 			if(angleInter>0){ //Positive is a Left Turn
 				//Left Turn}
 				turnDir = -1;
@@ -77,13 +81,14 @@ void OnPathTest(int row,int col){
 		lastInter = 0;
 	}
 
-
-	// for(int z = 0; z = sizeof(locationArray); z++){
-	for(int z = 0; z < 17; z++){
-		if (row == locationArray[z][0] && col == locationArray[z][1]){
-			waypointPath.push_back (z);
-			printf("\nIntersection %d added \n",z);
-			lastInter = 1; //sets to true
+	if (PathTestCnt > 0){
+		// for(int z = 0; z = sizeof(locationArray); z++){
+		for(int z = 0; z < 17; z++){
+			if (row == locationArray[z][0] && col == locationArray[z][1]){
+				waypointPath.push_back (z);
+				printf("\nIntersection %d added \n",z);
+				lastInter = 1; //sets to true
+			}
 		}
 	}
 	
@@ -752,10 +757,10 @@ int main()
 };
 
 	// Source is the left-most bottom-most corner
-	Pair src = make_pair(20, 7);
+	Pair src = make_pair(0, 8);
 
 	// Destination is the left-most top-most corner
-	Pair dest = make_pair(4, 10);
+	Pair dest = make_pair(6, 14);
 
 	aStarSearch(grid, src, dest);
 
