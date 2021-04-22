@@ -55,7 +55,6 @@ double atPoint = 0;
 //list of points to travel
 std::vector<double> waypoint_path;
 
-
 //A Star
 // A C++ Program to implement A* Search Algorithm
 #include <bits/stdc++.h>
@@ -64,8 +63,7 @@ using namespace std;
 #define ROW 24
 #define COL 15
 
-std::vector<double> waypointPath;//vector<int> waypointPath;
-vector<int> waypointTurn;
+vector<int> waypointPath; vector<int> waypointTurn;
 int lastcellRow1; int lastcellCol1; int lastcellRow2; int lastcellCol2; int lastInter = 0; int PathTestCnt = -1;
 
 int currentLoop = 0;
@@ -117,7 +115,6 @@ int locationArray[17][2]={
 	{4,10}, //P
 	{23,7}, //Q
 };
-
 
 
 //A function to test if a given row, col exist as an intersection
@@ -181,7 +178,7 @@ void OnPathTest(int row,int col){
 				turnDir = 1;
 			}
 		}
-		//printf("\nTurn %d added \n",turnDir);
+		printf("\nTurn %d added \n",turnDir);
 		waypointTurn.push_back(turnDir);
 		//Reset Trigger
 		lastInter = 0;
@@ -191,9 +188,8 @@ void OnPathTest(int row,int col){
 		// for(int z = 0; z = sizeof(locationArray); z++){
 		for(int z = 0; z < 17; z++){
 			if (row == locationArray[z][0] && col == locationArray[z][1]){
-				waypointPath.push_back(z);
-				//printf("\nIntersection %d added \n",z);
-        ROS_INFO("Astar search ran and found an intersection : (%d)",  z);
+				waypointPath.push_back (z);
+				printf("\nIntersection %d added \n",z);
 				lastInter = 1; //sets to true
 			}
 		}
@@ -299,7 +295,6 @@ void tracePath(cell cellDetails[][COL], Pair dest)
 		printf("-> (%d,%d) ", p.first, p.second);
 		//printf("Before OnPathTest");
 		//Added to check if row, col are a intersection, add to global list
-    ROS_INFO("\nwriting to path : ()");
 		OnPathTest(p.first,p.second);
 	}
 
@@ -628,6 +623,7 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 	
 }
 
+
 void timerCallback(const ros::TimerEvent& event){
    //should only init
 
@@ -679,9 +675,11 @@ void timerCallback(const ros::TimerEvent& event){
   current_pose.pose.position.y = relative_position.y();
   //Use i to shorten code
   // int i = current_waypoint; 
-  int i = waypoint_path[current_waypoint];
-  // int z = waypointPath[current_waypoint];
-  // int currentTurn = waypointTurn[current_waypoint];
+  //int i = waypoint_path[current_waypoint];
+  //change to a*
+  int i = waypointPath[current_waypoint];
+  int currentTurn = waypointTurn[current_waypoint];
+  
   //Needed for Term Project????
   /*
   gps_path.poses.push_back(current_pose);
@@ -725,16 +723,17 @@ void timerCallback(const ros::TimerEvent& event){
 
   double turnDir;
   double turnDist;
-  if (current_waypoint== 2)
+
+  //Converted to A*
+  if (currentTurn == 1)
   {
     turnDir = 2; //Right
     turnDist = 8;
   }
-  else{
+  else if(currentTurn == -1){
     turnDir = 1; //Left
     turnDist = 8;
   }
-
 
   cmd_throttle.data = 0.1;
   cmd_brake.data = 0;
@@ -743,7 +742,8 @@ void timerCallback(const ros::TimerEvent& event){
     // cmd_throttle.data = 0;
     // cmd_brake.data = 100;
 
-    if (current_waypoint == 3){
+    //If at maximum index of waypoint list stop vehicle
+    if (current_waypoint == waypointPath.size()){ //if (current_waypoint == sizeof(waypointPath))
       cmd_throttle.data = 0;
       cmd_brake.data = 1000;
     }
@@ -772,21 +772,15 @@ void timerCallback(const ros::TimerEvent& event){
    pub_brake.publish(cmd_brake);
    pub_vel.publish(cmd_throttle);
 
-/*
-  if (dist<0.99){ //Set threshold below 1 
-    current_waypoint++; //Is this correct???
-  }
-*/
-
-
-  // ROS_INFO("Relative Position: (%f, %f)", relative_position.x(), relative_position.y());
-  // ROS_INFO("Waypoint UTM: (%f, %f)", waypoint_coords.getX(), waypoint_coords.getY());
-  // ROS_INFO("Waypoint Relative Position: (%f, %f)", relative_position_waypoint[i].x(), relative_position_waypoint[i].y());
-  // ROS_INFO("Calculated Distance: (%f)",  dist);
-  // ROS_INFO("i: (%d)",  i);
-  // ROS_INFO("current_waypoint: (%d)",  current_waypoint);
-  // ROS_INFO("current waypoint from a*: (%d)",  z);
-  // ROS_INFO("current turn cmd from a*: (%d)",  currentTurn);
+  //Debugging Log
+  ROS_INFO("Relative Position: (%f, %f)", relative_position.x(), relative_position.y());
+  ROS_INFO("Waypoint UTM: (%f, %f)", waypoint_coords.getX(), waypoint_coords.getY());
+  ROS_INFO("Waypoint Relative Position: (%f, %f)", relative_position_waypoint[i].x(), relative_position_waypoint[i].y());
+  ROS_INFO("Calculated Distance: (%f)",  dist);
+  ROS_INFO("i: (%d)",  i);
+  ROS_INFO("current_waypoint: (%d)",  current_waypoint);
+  ROS_INFO("Next Turn command (%d)",  waypointTurn[i]);
+  
   
 }
 
@@ -811,36 +805,33 @@ void recvCmd(const geometry_msgs::TwistConstPtr& msg)
 }
 
 int main(int argc, char** argv){
-
-    // Add A*
-  	// Source is the left-most bottom-most corner
-	Pair src = make_pair(20, 7);
-
-	// Destination is the left-most top-most corner
-	Pair dest = make_pair(10, 10);
-
-	aStarSearch(grid, src, dest);
-
   ros::init(argc,argv,"gps_sim_nhabben");
   ros::NodeHandle nh;
+  //Add A*
+  	// Source is the left-most bottom-most corner
+	// Pair src = make_pair(20, 7);
+
+	// // Destination is the left-most top-most corner
+	// Pair dest = make_pair(10, 10);
+
+	// aStarSearch(grid, src, dest);
+
   ros::Subscriber gps_heading = nh.subscribe("/audibot/gps/fix",1,recvFix);
   ros::Subscriber sub_steer = nh.subscribe("/audibot/cmd_vel",1,recvCmd);
   ros::Subscriber gps_sub = nh.subscribe("/audibot/gps/heading",1,recvFix2);
   ros::Timer timer = nh.createTimer(ros::Duration(0.02), timerCallback);
   // path_pub = nh.advertise<nav_msgs::Path>("gps_path",1); //Not needed????
 
-
-
   double ref_lat;
   double ref_lon;
-  current_waypoint = 0;
 
+  // current_waypoint = 0;
 
-  waypoint_path.resize(4);
-  waypoint_path[0] = 1;
-  waypoint_path[1] = 2;
-  waypoint_path[2] = 3;
-  waypoint_path[3] = 12;
+  // waypoint_path.resize(4);
+  // waypoint_path[0] = 1;
+  // waypoint_path[1] = 2;
+  // waypoint_path[2] = 3;
+  // waypoint_path[3] = 12;
 
   nh.getParam("/audibot/gps/ref_lat",ref_lat);
   nh.getParam("/audibot/gps/ref_lon",ref_lon);
@@ -861,6 +852,12 @@ int main(int argc, char** argv){
   pub_steering = nh.advertise<std_msgs::Float64>("/audibot/steering_cmd", 1);
    pub_brake = nh.advertise<std_msgs::Float64>("/audibot/brake_cmd", 1);
   
+  //Calculate Distance 
+  int startIndex = 0; int endIndex = 1; 
+
+  double distWaypoint;
+  distWaypoint = sqrt((((locationArray[startIndex][0] - locationArray[endIndex][0])^2)+ ((locationArray[startIndex][1] - locationArray[endIndex][1])^2)));
+
 
   ros::spin();
 }
