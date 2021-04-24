@@ -9,6 +9,22 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <tf/tf.h>
 #include <tf/transform_broadcaster.h>
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define ROW 24
+#define COL 15
+
+
+//INputs
+    // Add A*
+  	// Source is the left-most bottom-most corne
+
+  string TargetIntersection = "D";
+  string StartingIntersection = "A";
+
+//-------------
 
 UTMCoords ref_coords;
 tf::Vector3 relative_position;
@@ -58,14 +74,28 @@ std::vector<double> waypoint_path;
 
 //A Star
 // A C++ Program to implement A* Search Algorithm
-#include <bits/stdc++.h>
-using namespace std;
+// #include <bits/stdc++.h>
+// using namespace std;
 
-#define ROW 24
-#define COL 15
+// #define ROW 24
+// #define COL 15
+
+// Creating a shortcut for int, int pair type
+typedef pair<int, int> Pair;
+
+// Creating a shortcut for pair<int, pair<int, int>> type
+typedef pair<double, pair<int, int> > pPair;
+struct cell {
+	// Row and Column index of its parent
+	// Note that 0 <= i <= ROW-1 & 0 <= j <= COL-1
+	int parent_i, parent_j;
+	// f = g + h
+	double f, g, h;
+};
+//-------------
 
 std::vector<double> waypointPath;//vector<int> waypointPath;
-vector<int> waypointTurn;
+std::vector<int> waypointTurn;
 int lastcellRow1; int lastcellCol1; int lastcellRow2; int lastcellCol2; int lastInter = 0; int PathTestCnt = -1;
 
 int currentLoop = 0;
@@ -84,8 +114,8 @@ int grid[ROW][COL]
   {1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1}, 
   {1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1}, 
   {1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1}, 
-  {1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1}, 
-  {1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1}, 
+  {1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1}, 
+  {1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1}, 
   {1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1}, 
   {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1}, 
   {1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1}, 
@@ -118,16 +148,36 @@ int locationArray[17][2]={
 	{23,7}, //Q
 };
 
+int startx;
+int starty;
+int endx;
+int endy;
+// // Creating a shortcut for int, int pair type
+// typedef pair<int, int> Pair;
 
+// // Creating a shortcut for pair<int, pair<int, int>> type
+// typedef pair<double, pair<int, int> > pPair;
+
+// A structure to hold the neccesary parameters
+// struct cell {
+// 	// Row and Column index of its parent
+// 	// Note that 0 <= i <= ROW-1 & 0 <= j <= COL-1
+// 	int parent_i, parent_j;
+// 	// f = g + h
+// 	double f, g, h;
+// };
+
+
+	
 
 //A function to test if a given row, col exist as an intersection
 void OnPathTest(int row,int col){
 	
-
+//ROS_INFO("Inside OnPathTest  : ()");
   //Used inorder to tie Letter to target intersection
-  /*
+  
 	PathTestCnt++;
-
+/*
   string Inputstrg = "A";
 
   vector<string>InputArrayString[17];
@@ -186,7 +236,7 @@ void OnPathTest(int row,int col){
 		//Reset Trigger
 		lastInter = 0;
 	}
-
+ 
 	if (PathTestCnt > 0){
 		// for(int z = 0; z = sizeof(locationArray); z++){
 		for(int z = 0; z < 17; z++){
@@ -215,20 +265,20 @@ void OnPathTest(int row,int col){
 }
 
 
-// Creating a shortcut for int, int pair type
-typedef pair<int, int> Pair;
+// // Creating a shortcut for int, int pair type
+// typedef pair<int, int> Pair;
 
-// Creating a shortcut for pair<int, pair<int, int>> type
-typedef pair<double, pair<int, int> > pPair;
+// // Creating a shortcut for pair<int, pair<int, int>> type
+// typedef pair<double, pair<int, int> > pPair;
 
-// A structure to hold the neccesary parameters
-struct cell {
-	// Row and Column index of its parent
-	// Note that 0 <= i <= ROW-1 & 0 <= j <= COL-1
-	int parent_i, parent_j;
-	// f = g + h
-	double f, g, h;
-};
+// // A structure to hold the neccesary parameters
+// struct cell {
+// 	// Row and Column index of its parent
+// 	// Note that 0 <= i <= ROW-1 & 0 <= j <= COL-1
+// 	int parent_i, parent_j;
+// 	// f = g + h
+// 	double f, g, h;
+// };
 
 
 
@@ -307,7 +357,6 @@ void tracePath(cell cellDetails[][COL], Pair dest)
 
 	return;
 }
-
 
 // A Function to find the shortest path between
 // a given source cell to a destination cell according
@@ -629,7 +678,6 @@ void aStarSearch(int grid[][COL], Pair src, Pair dest)
 }
 
 void timerCallback(const ros::TimerEvent& event){
-   //should only init
 
   waypoint_lat.resize(17);
   waypoint_lat[0] = 42.00244378; 
@@ -677,19 +725,12 @@ void timerCallback(const ros::TimerEvent& event){
   geometry_msgs::PoseStamped current_pose;
   current_pose.pose.position.x = relative_position.x();
   current_pose.pose.position.y = relative_position.y();
-  //Use i to shorten code
-  // int i = current_waypoint; 
-  int i = waypoint_path[current_waypoint];
-  // int z = waypointPath[current_waypoint];
-  // int currentTurn = waypointTurn[current_waypoint];
-  //Needed for Term Project????
-  /*
-  gps_path.poses.push_back(current_pose);
-  gps_path.header.frame_id="world";
-  gps_path.header.stamp = event.current_real;
-  path_pub.publish(gps_path);
-  */
   
+  //Use i to shorten code
+  int i = waypointPath[current_waypoint];
+  int currentTurn = waypointTurn[current_waypoint];
+
+  //Heading Calculation
   double dist = (relative_position - relative_position_waypoint[i]).length();
   double theta = atan2((relative_position_waypoint[i].y() - relative_position.y()),(relative_position_waypoint[i].x() - relative_position.x()));
 
@@ -714,48 +755,46 @@ void timerCallback(const ros::TimerEvent& event){
     error_steering = error_steering +(2*M_PI);
   }
 
-  //Nick removed Control model since it was not great. 
-  //
-  
-  // cmd_vel.linear.x =  speed;
-  // cmd_steering.data = steering_gain;//*(error_steering);
-
-  // pub_vel.publish(cmd_vel);
-  // pub_steering.publish(cmd_steering);
-
-  double turnDir;
   double turnDist;
-  if (current_waypoint== 2)
+
+ if (currentTurn == 1)
   {
-    turnDir = 2; //Right
+    //Right
+    turnDist = 9;
+  }
+  else if(currentTurn == -1){
+    //Left
     turnDist = 8;
   }
   else{
-    turnDir = 1; //Left
-    turnDist = 8;
+    //sTRAIGHT,
+    turnDist = 9;
   }
-
 
   cmd_throttle.data = 0.1;
   cmd_brake.data = 0;
-  
-  if (dist < turnDist){
-    // cmd_throttle.data = 0;
-    // cmd_brake.data = 100;
 
-    if (current_waypoint == 3){
+  if (dist < turnDist){
+
+    // ROS_INFO("current_waypoint: (%d)",  current_waypoint);
+    // ROS_INFO("waypointPath.size: (%lu)",  waypointPath.size());
+    if (current_waypoint == (waypointPath.size()-1)){
       cmd_throttle.data = 0;
       cmd_brake.data = 1000;
+      ROS_INFO("Braking:");
     }
     else
     {
       atPoint = 1;
-      if (turnDir ==1) {
+      //ROS_INFO("In Intersection");
+      if (currentTurn == -1) {
         cmd_steering.data = 4.8; // 10 8 4
+        ROS_INFO("Left Turn:");
       }
-      else if (turnDir == 2)
+      else if (currentTurn == 1)
       {
-        cmd_steering.data = -9;
+        ROS_INFO("Right Turn:");
+        cmd_steering.data = -7.5;
       }
     }
   }
@@ -772,20 +811,16 @@ void timerCallback(const ros::TimerEvent& event){
    pub_brake.publish(cmd_brake);
    pub_vel.publish(cmd_throttle);
 
-/*
-  if (dist<0.99){ //Set threshold below 1 
-    current_waypoint++; //Is this correct???
-  }
-*/
-
 
   // ROS_INFO("Relative Position: (%f, %f)", relative_position.x(), relative_position.y());
   // ROS_INFO("Waypoint UTM: (%f, %f)", waypoint_coords.getX(), waypoint_coords.getY());
   // ROS_INFO("Waypoint Relative Position: (%f, %f)", relative_position_waypoint[i].x(), relative_position_waypoint[i].y());
-  // ROS_INFO("Calculated Distance: (%f)",  dist);
-  // ROS_INFO("i: (%d)",  i);
+  ROS_INFO("Calculated Distance: (%f)",  dist);
+  ROS_INFO("turnDist : (%f)",  turnDist);
   // ROS_INFO("current_waypoint: (%d)",  current_waypoint);
-  // ROS_INFO("current waypoint from a*: (%d)",  z);
+  ROS_INFO("current_waypoint: (%d)",  current_waypoint);
+  ROS_INFO("waypointPath.size: (%lu)",  sizeof(waypointPath));
+  ROS_INFO("waypointPath.size: (%lu)",  waypointPath.size());
   // ROS_INFO("current turn cmd from a*: (%d)",  currentTurn);
   
 }
@@ -794,9 +829,7 @@ void recvFix(const sensor_msgs::NavSatFixConstPtr& msg){
   UTMCoords current_coords(*msg);
   veh_lat = msg->latitude;
   veh_lon = msg->longitude;
-  relative_position = current_coords - ref_coords;
-//Removed Marker Array
-  
+  relative_position = current_coords - ref_coords;  
 }
 
 void recvFix2(const std_msgs::Float64ConstPtr& msg){
@@ -810,15 +843,61 @@ void recvCmd(const geometry_msgs::TwistConstPtr& msg)
   pathSteeringAngle = gam * atan((L*pathAngle)/pathSpeed);
 }
 
+void calcTarget(string start,string end){
+  
+  //vector<string> StringArray;
+  string letterArray[17] = {
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N",
+    "O",
+    "P",
+    "Q",
+  };
+   int startIdx;  int endIdx;
+
+  for(int s = 0;s<17;s++){
+    string letter = letterArray[s];
+    if (letter.find(start) != string::npos) {
+    //.. found.
+    ROS_INFO("Found Start!");
+    startIdx = s;
+    } 
+    if (letter.find(end) != string::npos) {
+    ROS_INFO("Found End!");
+    endIdx = s;
+    }
+  }
+
+  startx = locationArray[startIdx][0];
+  starty= locationArray[startIdx][1];;
+  endx= locationArray[endIdx][0];; 
+  endy= locationArray[endIdx][1];;
+}
+
+
 int main(int argc, char** argv){
 
-    // Add A*
-  	// Source is the left-most bottom-most corner
-	Pair src = make_pair(20, 7);
+  //   // Add A*
+  // 	// Source is the left-most bottom-most corner
+	// Pair src = make_pair(13, 2);
 
-	// Destination is the left-most top-most corner
-	Pair dest = make_pair(10, 10);
-
+	// // Destination is the left-most top-most corner
+	// Pair dest = make_pair(10, 6);
+  calcTarget(StartingIntersection,TargetIntersection);
+	Pair src = make_pair(startx, starty);
+	Pair dest = make_pair(endx, endy);
 	aStarSearch(grid, src, dest);
 
   ros::init(argc,argv,"gps_sim_nhabben");
@@ -827,14 +906,10 @@ int main(int argc, char** argv){
   ros::Subscriber sub_steer = nh.subscribe("/audibot/cmd_vel",1,recvCmd);
   ros::Subscriber gps_sub = nh.subscribe("/audibot/gps/heading",1,recvFix2);
   ros::Timer timer = nh.createTimer(ros::Duration(0.02), timerCallback);
-  // path_pub = nh.advertise<nav_msgs::Path>("gps_path",1); //Not needed????
-
-
 
   double ref_lat;
   double ref_lon;
   current_waypoint = 0;
-
 
   waypoint_path.resize(4);
   waypoint_path[0] = 1;
@@ -847,20 +922,11 @@ int main(int argc, char** argv){
   
   LatLon ref_coords_lat_lon(ref_lat, ref_lon, 0);
   ref_coords = UTMCoords(ref_coords_lat_lon);
-
   central_meridian = ref_coords.getCentralMeridian();
-
-  ROS_INFO("Central Meridian of the Reference Cooridinate: %f", central_meridian);
-  ROS_INFO("ref lat and ref lon %f  %f",ref_lat,ref_lon); //Add in for checking init location
-
-  // pub_vel = nh.advertise<geometry_msgs::Twist>("/audibot/cmd_vel", 1);
-  // pub_steering = nh.advertise<std_msgs::Float64>("/audibot/steering_cmd", 1);
   
-  //For not using Twist Controller
   pub_vel = nh.advertise<std_msgs::Float64>("/audibot/throttle_cmd", 1);
   pub_steering = nh.advertise<std_msgs::Float64>("/audibot/steering_cmd", 1);
-   pub_brake = nh.advertise<std_msgs::Float64>("/audibot/brake_cmd", 1);
+  pub_brake = nh.advertise<std_msgs::Float64>("/audibot/brake_cmd", 1);
   
-
   ros::spin();
 }
