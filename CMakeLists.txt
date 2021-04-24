@@ -18,8 +18,8 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(gps_sim_nhabben src/gps_sim_nhabben.cpp)
-target_link_libraries(gps_sim_nhabben ${catkin_LIBRARIES})
+add_executable(urban_nav src/urban_nav.cpp)
+target_link_libraries(urban_nav ${catkin_LIBRARIES})
 
 add_executable(topic src/topic.cpp)
 target_link_libraries(topic ${catkin_LIBRARIES})

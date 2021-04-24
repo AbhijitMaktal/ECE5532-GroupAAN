@@ -22,7 +22,7 @@
   </group>
     
   <!-- <node pkg="urban_nav" type="gps_sim_nhabben" name="gps_sim_nhabben" output="screen" /> -->
-  <node pkg="urban_nav" type="gps_sim_nhabben" name="gps_sim_nhabben" output="screen"/>
+  <node pkg="urban_nav" type="urban_nav" name="urban_nav" output="screen"/>
   <!-- <node pkg="urban_nav" type="topic" name="topic" /> -->
   
 </launch>

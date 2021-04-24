@@ -701,7 +701,7 @@ int main(int argc, char** argv){
 	Pair dest = make_pair(endx, endy);
 	aStarSearch(grid, src, dest);
 
-  ros::init(argc,argv,"gps_sim_nhabben");
+  ros::init(argc,argv,"urban_nav");
   ros::NodeHandle nh;
   ros::Subscriber gps_heading = nh.subscribe("/audibot/gps/fix",1,recvFix);
   ros::Subscriber sub_steer = nh.subscribe("/audibot/cmd_vel",1,recvCmd);
